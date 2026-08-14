@@ -234,13 +234,22 @@ def build_stats_block(pal, handle, data):
     return '\n'.join(lines)
 
 
+CARD_WIDTH = 1260
+CARD_HEIGHT = 630
+
+
 def rebuild(path, handle, theme, data):
     with open(path) as f:
         content = f.read()
     ascii_lines = re.findall(r'  <text x="28".*?</text>', content)
     ascii_block = '\n'.join(ascii_lines)
     rect = re.search(r'<rect[^>]*/>', content).group(0)
+    rect = re.sub(r'width="[\d.]+"', f'width="{CARD_WIDTH - 1}"', rect)
+    rect = re.sub(r'height="[\d.]+"', f'height="{CARD_HEIGHT - 1}"', rect)
     svg_open = re.search(r'<svg[^>]*>', content).group(0)
+    svg_open = re.sub(r'width="[\d.]+"', f'width="{CARD_WIDTH}"', svg_open)
+    svg_open = re.sub(r'height="[\d.]+"', f'height="{CARD_HEIGHT}"', svg_open)
+    svg_open = re.sub(r'viewBox="[^"]*"', f'viewBox="0 0 {CARD_WIDTH} {CARD_HEIGHT}"', svg_open)
 
     pal = PALETTES[theme]
     stats_block = build_stats_block(pal, handle, data)

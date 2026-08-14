@@ -31,9 +31,9 @@ STATIC = {
 FONT = "font-family=\"'Consolas', 'Menlo', 'DejaVu Sans Mono', monospace\""
 
 PALETTES = {
-    'dark': dict(x=540, y0=34.6, dash='#3d444d', title='#58a6ff', key='#ffa657', dots='#484f58',
+    'dark': dict(x=540, y0=74.6, dash='#3d444d', title='#58a6ff', key='#ffa657', dots='#484f58',
                  val='#c9d1d9', num='#79c0ff', add='#3fb950', dele='#f85149'),
-    'light': dict(x=492, y0=34.6, dash='#d0d7de', title='#0969da', key='#953800', dots='#8c959f',
+    'light': dict(x=492, y0=74.6, dash='#d0d7de', title='#0969da', key='#953800', dots='#8c959f',
                   val='#24292f', num='#0550ae', add='#1a7f37', dele='#cf222e'),
 }
 
@@ -235,7 +235,7 @@ def build_stats_block(pal, handle, data):
 
 
 CARD_WIDTH = 1260
-CARD_HEIGHT = 536
+CARD_HEIGHT = 576
 
 
 def rebuild(path, handle, theme, data):

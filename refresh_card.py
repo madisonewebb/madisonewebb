@@ -172,22 +172,30 @@ def row(x, y, parts):
     return f'  <text x="{x}" y="{y}" {FONT} xml:space="preserve" font-size="16">{inner}</text>'
 
 
-def kv(pal, y, label, value, dots=3, val_color=None):
-    dot_str = ' ' + ('.' * dots) + ' ' if dots > 0 else ' '
+def col_width(labels, buffer=6):
+    return max(len(f'. {l}: ') for l in labels) + buffer
+
+
+def kv(pal, y, label, value, target, val_color=None):
+    prefix = f'. {label}: '
+    dots = max(3, target - len(prefix))
+    dot_str = ' ' + ('.' * dots) + ' '
     return row(pal['x'], y, [
-        (pal['key'], f'. {label}: '),
+        (pal['key'], prefix),
         (pal['dots'], dot_str),
         (val_color or pal['val'], value),
     ])
 
 
-def dual(pal, y, l1, v1, d1, l2, v2, d2):
-    dot1 = ' ' + ('.' * d1) + ' '
-    dot2 = ' ' + ('.' * d2) + ' '
+def dual(pal, y, l1, v1, target1, l2, v2, target2):
+    prefix1 = f'. {l1}: '
+    prefix2 = f'. {l2}: '
+    dot1 = ' ' + ('.' * max(3, target1 - len(prefix1))) + ' '
+    dot2 = ' ' + ('.' * max(3, target2 - len(prefix2))) + ' '
     return row(pal['x'], y, [
-        (pal['key'], f'. {l1}: '), (pal['dots'], dot1), (pal['num'], v1),
+        (pal['key'], prefix1), (pal['dots'], dot1), (pal['num'], v1),
         (pal['dash'], ' | '),
-        (pal['key'], f'. {l2}: '), (pal['dots'], dot2), (pal['num'], v2),
+        (pal['key'], prefix2), (pal['dots'], dot2), (pal['num'], v2),
     ])
 
 
@@ -199,31 +207,45 @@ def header(pal, y, title, dash_len):
     ])
 
 
+INFO_LABELS = ['OS', 'Uptime', 'Host', 'Kernel', 'IDE', 'Languages.Programming',
+               'Languages.Computer', 'Hobbies.Software', 'Hobbies.Hardware']
+CONTACT_LABELS = ['LinkedIn', 'Discord', 'Email.Personal', 'Email.Work']
+STATS_LEFT_LABELS = ['Repos', 'Commits', 'Contributed', 'Lines of Code']
+STATS_RIGHT_LABELS = ['Stars', 'Followers']
+
+
 def build_stats_block(pal, handle, data):
+    info_w = col_width(INFO_LABELS)
+    contact_w = col_width(CONTACT_LABELS)
+    stats_left_w = col_width(STATS_LEFT_LABELS, buffer=4)
+    stats_right_w = col_width(STATS_RIGHT_LABELS, buffer=4)
+
     y = pal['y0']
     lines = []
     lines.append(header(pal, y, f'{handle}@github', 40)); y += 20
-    lines.append(kv(pal, y, 'OS', STATIC['os'], 24)); y += 20
-    lines.append(kv(pal, y, 'Uptime', data['uptime'], 20)); y += 20
-    lines.append(kv(pal, y, 'Host', STATIC['host'], 38)); y += 20
-    lines.append(kv(pal, y, 'Kernel', STATIC['kernel'], 20)); y += 20
-    lines.append(kv(pal, y, 'IDE', STATIC['ide'], 33)); y += 30
-    lines.append(kv(pal, y, 'Languages.Programming', STATIC['lang_programming'], 5)); y += 20
-    lines.append(kv(pal, y, 'Languages.Computer', STATIC['lang_computer'], 9)); y += 30
-    lines.append(kv(pal, y, 'Hobbies.Software', STATIC['hobbies_software'], 8)); y += 20
-    lines.append(kv(pal, y, 'Hobbies.Hardware', STATIC['hobbies_hardware'], 12)); y += 30
+    lines.append(kv(pal, y, 'OS', STATIC['os'], info_w)); y += 20
+    lines.append(kv(pal, y, 'Uptime', data['uptime'], info_w)); y += 20
+    lines.append(kv(pal, y, 'Host', STATIC['host'], info_w)); y += 20
+    lines.append(kv(pal, y, 'Kernel', STATIC['kernel'], info_w)); y += 20
+    lines.append(kv(pal, y, 'IDE', STATIC['ide'], info_w)); y += 30
+    lines.append(kv(pal, y, 'Languages.Programming', STATIC['lang_programming'], info_w)); y += 20
+    lines.append(kv(pal, y, 'Languages.Computer', STATIC['lang_computer'], info_w)); y += 30
+    lines.append(kv(pal, y, 'Hobbies.Software', STATIC['hobbies_software'], info_w)); y += 20
+    lines.append(kv(pal, y, 'Hobbies.Hardware', STATIC['hobbies_hardware'], info_w)); y += 30
     lines.append(header(pal, y, 'Contact', 50)); y += 20
-    lines.append(kv(pal, y, 'LinkedIn', STATIC['linkedin'], 16)); y += 20
-    lines.append(kv(pal, y, 'Discord', STATIC['discord'], 36)); y += 20
-    lines.append(kv(pal, y, 'Email.Personal', STATIC['email_personal'], 12)); y += 20
-    lines.append(kv(pal, y, 'Email.Work', STATIC['email_work'], 20)); y += 30
+    lines.append(kv(pal, y, 'LinkedIn', STATIC['linkedin'], contact_w)); y += 20
+    lines.append(kv(pal, y, 'Discord', STATIC['discord'], contact_w)); y += 20
+    lines.append(kv(pal, y, 'Email.Personal', STATIC['email_personal'], contact_w)); y += 20
+    lines.append(kv(pal, y, 'Email.Work', STATIC['email_work'], contact_w)); y += 30
     lines.append(header(pal, y, 'GitHub Stats', 43)); y += 20
-    lines.append(dual(pal, y, 'Repos', data['repos'], 14, 'Stars', data['stars'], 15)); y += 20
-    lines.append(dual(pal, y, 'Commits', data['commits'], 9, 'Followers', data['followers'], 11)); y += 20
-    lines.append(kv(pal, y, 'Contributed', data['contrib'], 20, val_color=pal['num'])); y += 20
+    lines.append(dual(pal, y, 'Repos', data['repos'], stats_left_w, 'Stars', data['stars'], stats_right_w)); y += 20
+    lines.append(dual(pal, y, 'Commits', data['commits'], stats_left_w, 'Followers', data['followers'], stats_right_w)); y += 20
+    lines.append(kv(pal, y, 'Contributed', data['contrib'], stats_left_w, val_color=pal['num'])); y += 20
+    loc_prefix = '. Lines of Code: '
+    loc_dots = ' ' + ('.' * max(3, stats_left_w - len(loc_prefix))) + ' '
     lines.append(row(pal['x'], y, [
-        (pal['key'], '. Lines of Code: '),
-        (pal['dots'], ' .. '),
+        (pal['key'], loc_prefix),
+        (pal['dots'], loc_dots),
         (pal['num'], data['loc_total']),
         (pal['dash'], ' ( '),
         (pal['add'], f"+{data['loc_add']}"),
